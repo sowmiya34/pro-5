@@ -1,55 +1,50 @@
 name: Linux Security Autograding
 
 on:
-push:
-pull_request:
+  push:
+  pull_request:
 
 jobs:
+  security-tests:
+    runs-on: [self-hosted, linux, centos]
 
-security-tests:
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-```
-# This label should match your CentOS/RHEL self-hosted runner.
-runs-on: [self-hosted, linux, centos]
+      - name: Show operating system
+        run: |
+          cat /etc/os-release
 
-steps:
+      - name: Check SELinux
+        run: |
+          if ! command -v getenforce >/dev/null 2>&1; then
+            echo "SELinux tools are not installed"
+            exit 1
+          fi
 
-  - name: Checkout student submission
-    uses: actions/checkout@v4
+          echo "SELinux status:"
+          getenforce
 
-  - name: Show operating system
-    run: |
-      cat /etc/os-release
+      - name: Check required commands
+        run: |
+          command -v bash
+          command -v id
+          command -v getent
+          command -v stat
+          command -v runuser
+          command -v getenforce
 
-  - name: Check SELinux
-    run: |
-      if ! command -v getenforce >/dev/null 2>&1; then
-        echo "ERROR: SELinux tools are not installed."
-        exit 1
-      fi
+      - name: Make scripts executable
+        run: |
+          chmod +x starter.sh
+          chmod +x grader.sh
+          chmod +x tests/test_security.sh
 
-      getenforce
+      - name: Run student solution
+        run: |
+          ./starter.sh
 
-  - name: Check required tools
-    run: |
-      command -v bash
-      command -v getent
-      command -v id
-      command -v stat
-      command -v runuser
-      command -v getenforce
-
-  - name: Make scripts executable
-    run: |
-      chmod +x starter.sh
-      chmod +x grader.sh
-      chmod +x tests/test_security.sh
-
-  - name: Run student solution
-    run: |
-      ./starter.sh
-
-  - name: Run autograder
-    run: |
-      ./grader.sh
-```
+      - name: Run autograder
+        run: |
+          ./grader.sh
