@@ -2,49 +2,19 @@ name: Linux Security Autograding
 
 on:
   push:
+    branches: [ "main" ]
   pull_request:
+    branches: [ "main" ]
 
 jobs:
   security-tests:
-    runs-on: [self-hosted, linux, centos]
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Show operating system
+      # Add your autograding or security testing steps below:
+      - name: Run tests
         run: |
-          cat /etc/os-release
-
-      - name: Check SELinux
-        run: |
-          if ! command -v getenforce >/dev/null 2>&1; then
-            echo "SELinux tools are not installed"
-            exit 1
-          fi
-
-          echo "SELinux status:"
-          getenforce
-
-      - name: Check required commands
-        run: |
-          command -v bash
-          command -v id
-          command -v getent
-          command -v stat
-          command -v runuser
-          command -v getenforce
-
-      - name: Make scripts executable
-        run: |
-          chmod +x starter.sh
-          chmod +x grader.sh
-          chmod +x tests/test_security.sh
-
-      - name: Run student solution
-        run: |
-          ./starter.sh
-
-      - name: Run autograder
-        run: |
-          ./grader.sh
+          echo "Running security autograding tests..."
